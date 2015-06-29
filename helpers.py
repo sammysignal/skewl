@@ -1,6 +1,7 @@
 from user import User
 from flask import Flask
 from tinydb import TinyDB, where
+import base64
 app = Flask(__name__)
 users = TinyDB('db/users.json')
 
@@ -17,6 +18,6 @@ def get_user_by_username(username):
 # Saves new user to database. returns 0 on 'user with that username already exists'
 def save_new_user(username, password):
 	if (get_user_by_username(username)):
-		return 0
-	users.insert({'username': username, 'password': password})
-	return 1
+		return False
+	users.insert({'username': username, 'password': base64.b64encode(password)})
+	return True
