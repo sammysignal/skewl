@@ -10,7 +10,7 @@ app.secret_key = 'Q\xfd\n-r\x13V#_\x84\xbc>\x90ck\xb3\x83\xcaw\x81 \xaby7'
 
 @app.route("/", methods=['GET'])
 def home():
-	if 'username' in session:
+	if 'user' in session:
 		# logged in!
 		return render_template('home.html', session=session)
 	else:
@@ -18,7 +18,7 @@ def home():
 
 @app.route("/login/", methods=['GET', 'POST'])
 def login():
-	if 'username' in session:
+	if 'user' in session:
 		redirect(url_for('home'))
 
 	if request.method == 'GET':
@@ -46,9 +46,8 @@ def login():
 
 @app.route("/signup/", methods=['GET', 'POST'])
 def signup():
-	if 'username' in session:
+	if 'user' in session:
 		redirect(url_for('home'))
-
 	if request.method == 'GET':
 		return render_template('signup.html', error=0)
 
@@ -57,23 +56,33 @@ def signup():
 		print(request.form)
 		if (not request.form['username']) or \
 		   (not request.form['password']) or \
-		   (not request.form['passwordconfirm']):
+		   (not request.form['passwordconfirm']) or\
+		   (not request.form['email']):
 			print("0")
 			# login failed - incomplete form
 			return render_template('signup.html', error=1)
+		if (valid_email(request.form['email']) == -1):
+			# not an email
+			return render_template('signup.html', error=2)
+		if (valid_email(request.form['email']) == 0):
+			# not a college email
+			return render_template('signup.html', error=3)
 		if request.form['password'] != request.form['passwordconfirm']:
 			print("1")
 			# login failed - passwords do not match
-			return render_template('signup.html', error=2)
+			return render_template('signup.html', error=4)
 		print("about to save new user...")
-		usr = save_new_user(request.form['username'], base64.b64encode(request.form['password']))
-		if usr:
+		usr = save_new_user(request.form['username'], base64.b64encode(request.form['password']), request.form['email']))
+		if usr > 0:
 			print("saved successfully")
-			session['username'] = request.form['username']
-			return redirect(url_for('home'))
+			session['user'] = {
+				"username": request.form['username']
+		   		"email": request.form['email']
+		  	}
+			return redirect(url_for('home')) #TODO
 		else:
 			# login failed - that username is already taken
-			return render_template('signup.html', error=3)
+			return render_template('signup.html', error=5)
 	else:
 		abort(405)
 	return redirect(url_for('home'))
@@ -81,7 +90,7 @@ def signup():
 @app.route("/logout/", methods=['POST'])
 def logout():
 	if request.method == 'POST':
-		if 'username' in session:
+		if 'user' in session:
 			session.pop('username', None)
 	return redirect(url_for('home'))
 
@@ -89,11 +98,11 @@ def logout():
 def schools():
 	pass
 
-@app.route("/schools/<school>", methods=['GET'])
+@app.route("/schools/<school_name>", methods=['GET'])
 def school_name():
 	pass
 
-@app.route("/schools/<school>/<classname>", methods=['GET'])
+@app.route("/schools/<school_hash>/<class_name>", methods=['GET'])
 def class_name():
 	pass
 
