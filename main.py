@@ -85,6 +85,18 @@ def logout():
 			session.pop('username', None)
 	return redirect(url_for('home'))
 
+@app.route("/schools/", methods=['GET'])
+def schools():
+	pass
+
+@app.route("/schools/<school>", methods=['GET'])
+def school_name():
+	pass
+
+@app.route("/schools/<school>/<classname>", methods=['GET'])
+def class_name():
+	pass
+
 
 if __name__ == "__main__":
     app.run(debug = True)
