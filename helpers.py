@@ -1,4 +1,3 @@
-from user import User
 from flask import Flask
 from tinydb import TinyDB, where
 import base64
@@ -11,7 +10,7 @@ def get_user_by_username(username):
 	if len(usr) > 1:
 		raise Exception("Found more than one user with username '" + username + "'")
 	if usr:
-		return User(username, usr[0]["password"])
+		return {'username': username, 'password': usr[0]["password"]}
 	# No such user found, return 0
 	return 0
 

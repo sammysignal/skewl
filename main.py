@@ -6,13 +6,13 @@ import base64
 app = Flask(__name__)
 users = TinyDB('db/users.json')
 
-app.secret_key = 's\xdbF\x1eG.\xd3m\x8aA\x1a\x8d\xd2\xa1jk\x05\xb7\xf4\x10R\xce\xe4\xdc'
+app.secret_key = 'Q\xfd\n-r\x13V#_\x84\xbc>\x90ck\xb3\x83\xcaw\x81 \xaby7'
 
 @app.route("/", methods=['GET'])
 def home():
 	if 'username' in session:
 		# logged in!
-		return render_template('home.html', username=session['username'])
+		return render_template('home.html', session=session)
 	else:
 		return render_template('home.html')
 

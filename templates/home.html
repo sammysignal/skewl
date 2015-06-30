@@ -4,11 +4,11 @@
 	</head>
 
 	<body>
-	{% if username %}
+	{% if session.username %}
 	<form action="/logout/" method="POST">
 		<input type="submit" value="Log Out">
 	</form>
-	logged in with username {{ username }}
+	logged in with username {{ session.username }}
 	{% else %}
 	<form action="/login/" method="GET">
 		<input type="submit" value="Log In">
