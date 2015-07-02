@@ -46,20 +46,22 @@ def get_id_from_hash(_hash):
 
 # returns user object from db, else return 0.
 def get_user_by_username(username):
+	print("getting user by username")
 	usr = users.search(where('username') == username)
 	if usr:
 		if len(usr) > 1:
 			raise Exception("Found more than one user with username '" + username + "'")
-		return {'username': username, 'password': usr[0]["password"], 'id': usr[0]["id"], 'email': usr[0]["email"]}
+		return {'username': username, 'password': usr[0]["password"], 'email': usr[0]["email"], 'id': usr[0]["id"]}
 	# No such user found, return 0
 	return 0
 
 def get_user_by_email(email):
+	print("getting user by email")
 	usr = users.search(where('email') == email)
 	if usr:
 		if len(usr) > 1:
-			raise Exception("Found more than one user with username '" + username + "'")
-		return {'username': username, 'password': usr[0]["password"], 'id': usr[0]["id"], 'email': email}
+			raise Exception("Found more than one user with email '" + email + "'")
+		return {'username': usr[0]["username"], 'password': usr[0]["password"], 'email': email, 'id': usr[0]["id"]}
 	# No such user found, return 0
 	return 0
 

@@ -1,8 +1,9 @@
 from flask import Flask, request, session, redirect, url_for, render_template
-from flaskext.mail import Mail
+from flask_mail import Mail
 from user import User
 from helpers import *
 from tinydb import TinyDB, where
+from validate_email import validate_email
 import base64
 app = Flask(__name__)
 users = TinyDB('db/users.json')
@@ -45,11 +46,11 @@ def login():
 			return render_template('login.html', error=1)
 		usr = get_user_by_username(request.form['username_or_email'])
 		if not usr:
-			if valid_email(request.form['username_or_email']):
+			if validate_email(request.form['username_or_email']):
 				usr = get_user_by_email(request.form['username_or_email'])
 		if usr:
-			if usr.password == base64.b64encode(request.form['password']):
-				session['username'] = request.form['username']
+			if usr['password'] == base64.b64encode(request.form['password']):
+				session['username'] = usr['username']
 				redirect(url_for('home'))
 			else:
 				# login failed - bad credentials
@@ -64,6 +65,7 @@ def login():
 
 @app.route("/signup/", methods=['GET', 'POST'])
 def signup():
+	err = request.args.get('error')
 	if 'user' in session:
 		redirect(url_for('home'))
 	if request.method == 'GET':
@@ -89,11 +91,16 @@ def signup():
 			print("1")
 			# login failed - passwords do not match
 			return render_template('signup.html', error=4)
-		print("about to save new user...")
 		confirm = generate_random_string()
-		usr = save_new_user(request.form['username'], base64.b64encode(request.form['password']), \
+		worked = save_new_user(request.form['username'], base64.b64encode(request.form['password']), \
 							request.form['email'], confirm , 0)
-		if usr > 0:
+		if worked == -2:
+			print("username already in use!")
+			redirect(url_for('login', error="username"))
+		if worked == -1:
+			print("email already in use!")
+			redirect(url_for('login', error="email"))
+		if worked > 0:
 			print("saved successfully")
 			session['user'] = {
 				"username": request.form['username'],
@@ -111,7 +118,7 @@ def signup():
 @app.route("/logout/", methods=['POST'])
 def logout():
 	if request.method == 'POST':
-		if 'user' in session:
+		if 'username' in session:
 			session.pop('username', None)
 	return redirect(url_for('home'))
 
