@@ -1,11 +1,12 @@
-from flask import Flask
+from flask import Flask, request, session, redirect, url_for, render_template
 from tinydb import TinyDB, where
 from validate_email import validate_email
-import base64
+import base64, string, random
 
 users = TinyDB('db/users.json')
 schools = TinyDB('db/schools.json')
 backend_globals = TinyDB('db/BackendGlobals.json')
+
 
 def base36encode(number, alphabet='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'):
 	"""Converts an integer to a base36 string."""
@@ -29,6 +30,10 @@ def base36encode(number, alphabet='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ'):
 
 def base36decode(number):
 	return int(number, 36)
+
+def generate_random_string():
+	return ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(10))
+
 
 def get_hash_from_id(_id):
 	h = base36encode(_id)
@@ -59,12 +64,14 @@ def get_user_by_email(email):
 	return 0
 
 # Saves new user to database. returns 0 on 'user with that username already exists'
-def save_new_user(username, password, email, confirmed):
+def save_new_user(username, password, email, confirm_string, confirmed):
 	if (get_user_by_username(username)):
 		return -2
 	if (get_user_by_email(email)):
 		return -1
-	users.insert({'username': username, 'password': password, 'email': email, 'id': (get_last_user_id() + 1), 'confirmed': 0})
+	users.insert({'username': username, 'password': password, \
+				  'email': email, 'id': (get_last_user_id() + 1), \
+				  'confirm_string': confirm_string, 'confirmed': 0})
 	return 1
 
 def confirm_user(username):
@@ -140,5 +147,14 @@ def test_base36_encoding():
 	assert(base36decode("10") == 36)
 	assert(base36decode("9") == 9)
 	assert(base36decode("0000009") == 9)
+	return
+
+def send_confirm_email(code, mail, username, email):
+	from flaskext.mail import Message
+	domain = 'localhost:5000'
+	msg = Message("Hello " + username + "!", recipients=[email])
+	msg.body = "Please click the link to confirm your email at skewl.com."
+	msg.html = '<a href="http://' + domain + '/confirm?code=' + code + '">Confirm Email</a>'
+	mail.send(msg)
 	return
 

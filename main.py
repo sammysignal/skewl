@@ -1,10 +1,12 @@
 from flask import Flask, request, session, redirect, url_for, render_template
+from flaskext.mail import Mail
 from user import User
 from helpers import *
 from tinydb import TinyDB, where
 import base64
 app = Flask(__name__)
 users = TinyDB('db/users.json')
+mail = Mail(app)
 
 app.secret_key = 'Q\xfd\n-r\x13V#_\x84\xbc>\x90ck\xb3\x83\xcaw\x81 \xaby7'
 
@@ -15,6 +17,14 @@ def home():
 		return render_template('home.html', session=session)
 	else:
 		return render_template('home.html')
+
+@app.route("/confirm/", methods=['GET'])
+def confirm():
+	code = request.args.get('code', '')
+	if code:
+
+	else:
+		redirect(url_for('home'))
 
 @app.route("/login/", methods=['GET', 'POST'])
 def login():
@@ -56,7 +66,7 @@ def signup():
 		print(request.form)
 		if (not request.form['username']) or \
 		   (not request.form['password']) or \
-		   (not request.form['passwordconfirm']) or\
+		   (not request.form['passwordconfirm']) or \
 		   (not request.form['email']):
 			print("0")
 			# login failed - incomplete form
@@ -72,14 +82,17 @@ def signup():
 			# login failed - passwords do not match
 			return render_template('signup.html', error=4)
 		print("about to save new user...")
-		usr = save_new_user(request.form['username'], base64.b64encode(request.form['password']), request.form['email']))
+		confirm = generate_random_string()
+		usr = save_new_user(request.form['username'], base64.b64encode(request.form['password']), \
+							request.form['email'], confirm , 0)
 		if usr > 0:
 			print("saved successfully")
 			session['user'] = {
 				"username": request.form['username']
 		   		"email": request.form['email']
 		  	}
-			return redirect(url_for('home')) #TODO
+		  	send_confirm_email(confirm, mail, request.form['username'], request.form['email'])
+			return redirect(url_for('home'), email_sent=1) #TODO
 		else:
 			# login failed - that username is already taken
 			return render_template('signup.html', error=5)
