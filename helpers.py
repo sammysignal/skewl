@@ -137,6 +137,11 @@ def get_class_by_name(class_name, school_id=None):
 	pass
 
 
+def get_confirm_by_username(username):
+	usr = users.search(where('username') == username)
+	if usr:
+		return usr['confirm_string']
+	return 0
 
 def test_base36_encoding():
 	assert(base36encode(35) == "Z")
@@ -154,7 +159,7 @@ def send_confirm_email(code, mail, username, email):
 	domain = 'localhost:5000'
 	msg = Message("Hello " + username + "!", recipients=[email])
 	msg.body = "Please click the link to confirm your email at skewl.com."
-	msg.html = '<a href="http://' + domain + '/confirm?code=' + code + '">Confirm Email</a>'
+	msg.html = '<a href="http://' + domain + '/confirm?code=' + code + '&username=' + username + '">Confirm Email</a>'
 	mail.send(msg)
 	return
 
