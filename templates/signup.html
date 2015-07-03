@@ -5,6 +5,8 @@
 
 	<body>
 		<form action="/signup/" method="POST">
+			{% if error_text %} <b>{{ error_text }}</b> <br>{% endif %}
+			{% if action_text %} <b>{{ action_text }}</b> <br>{% endif %}
 			username:
 			<br>
 			<input type="text" name="username">

@@ -1,1 +1,1 @@
-{"_default": {"1": {"username": "admin", "password": "YWRtaW4=", "email": "sammysignal@gmail.com", "id": 0, "confirm_string": "ABCDEFGHIJ", "confirmed": 1}}}
+{"_default": {"1": {"username": "admin", "confirmed": 1, "password": "YWRtaW4=", "email": "sammysignal@gmail.com", "confirm_string": "ABCDEFGHIJ", "id": 0}}}

@@ -1,5 +1,6 @@
 from flask import Flask, request, session, redirect, url_for, render_template
 from tinydb import TinyDB, where
+from tinydb.operations import increment, delete
 from validate_email import validate_email
 import base64, string, random
 
@@ -78,8 +79,8 @@ def save_new_user(username, password, email, confirm_string, confirmed):
 
 def confirm_user(username):
 	usr = users.search(where('username') == username)
-	if usr:
-		if usr["confirmed"] == 0:
+	if usr and (len(usr) == 1):
+		if usr[0]["confirmed"] == 0:
 			users.update(increment('confirmed'), where('username') == username)
 		return True
 	return False
@@ -141,8 +142,8 @@ def get_class_by_name(class_name, school_id=None):
 
 def get_confirm_by_username(username):
 	usr = users.search(where('username') == username)
-	if usr:
-		return usr['confirm_string']
+	if usr and (len(usr) == 1):
+		return usr[0]['confirm_string']
 	return 0
 
 def test_base36_encoding():
@@ -157,9 +158,9 @@ def test_base36_encoding():
 	return
 
 def send_confirm_email(code, mail, username, email):
-	from flaskext.mail import Message
+	from flask_mail import Message
 	domain = 'localhost:5000'
-	msg = Message("Hello " + username + "!", recipients=[email])
+	msg = Message("Hello " + username + "!", sender="skewl.com@gmail.com", recipients=[email])
 	msg.body = "Please click the link to confirm your email at skewl.com."
 	msg.html = '<a href="http://' + domain + '/confirm?code=' + code + '&username=' + username + '">Confirm Email</a>'
 	mail.send(msg)
