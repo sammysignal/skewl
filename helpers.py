@@ -54,6 +54,7 @@ def get_user_by_username(username):
 			raise Exception("Found more than one user with username '" + username + "'")
 		return {'username': username, 'password': usr[0]["password"], 'email': usr[0]["email"], 'id': usr[0]["id"]}
 	# No such user found, return 0
+	print("no user with username " + username + " found.")
 	return 0
 
 def get_user_by_email(email):
@@ -64,6 +65,7 @@ def get_user_by_email(email):
 			raise Exception("Found more than one user with email '" + email + "'")
 		return {'username': usr[0]["username"], 'password': usr[0]["password"], 'email': email, 'id': usr[0]["id"]}
 	# No such user found, return 0
+	print("no user with email " + email + " found.")
 	return 0
 
 # Saves new user to database. returns 0 on 'user with that username already exists'
@@ -82,6 +84,7 @@ def confirm_user(username):
 	if usr and (len(usr) == 1):
 		if usr[0]["confirmed"] == 0:
 			users.update(increment('confirmed'), where('username') == username)
+			print("Confirmed value: " + str(usr[0]['confirmed']))
 		return True
 	return False
 

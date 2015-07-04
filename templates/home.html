@@ -4,8 +4,8 @@
 	</head>
 
 	<body>
-	{% if error_text %} <b>{{ error_text }}</b> {% endif %}
-	{% if action_text %} <b>{{ action_text }}</b> {% endif %}
+	{% if error_text %} <b>{{ error_text }}</b> <br>{% endif %}
+	{% if action_text %} <b>{{ action_text }}</b> <br>{% endif %}
 	{% if session.username %}
 	<form action="/logout/" method="POST">
 		<input type="submit" value="Log Out">

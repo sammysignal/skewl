@@ -5,8 +5,8 @@
 
 	<body>
 		<form action="/login/" method="POST">
-			{% if error_text %} <b>{{ error_text }}</b> {% endif %}
-			{% if action_text %} <b>{{ action_text }}</b> {% endif %}
+			{% if error_text %} <b>{{ error_text }}</b> <br>{% endif %}
+			{% if action_text %} <b>{{ action_text }}</b> <br>{% endif %}
 			username or email:
 			<br>
 			<input type="text" name="username_or_email">

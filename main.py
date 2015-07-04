@@ -25,7 +25,7 @@ def home():
 	if action:
 		if action == 'email-sent':
 			action_text = message_strings.signup_email_sent
-	if 'user' in session:
+	if 'username' in session:
 		# logged in!
 		return render_template('home.html', session=session, error_text=error, action_text=action)
 	else:
@@ -35,27 +35,32 @@ def home():
 def confirm():
 	code = request.args.get('code', '')
 	username = request.args.get('username', '')
+	print("Code: " + code)
+	print("username: " + username)
 	if code:
 		c = get_confirm_by_username(username)
 		if c:
 			if c == code:
+				print("confirming")
 				confirm_user(username)
-				redirect(url_for('login', action="confirmed"))
+				print("redirecting...")
+				return redirect(url_for('login', action="confirmed"))
 	else:
-		redirect(url_for('home'))
+		return redirect(url_for('home'))
 
 @app.route("/login/", methods=['GET', 'POST'])
 def login():
 	# action="confirmed"
 	# error="username"
 	# error="email"
+	print("reached login with method " + request.method)
 	action = request.args.get('action', '')
 	error = request.args.get('error', '')
 	action_text = ""
 	error_text = ""
 
-	if 'user' in session:
-		redirect(url_for('home'))
+	if 'username' in session:
+		return redirect(url_for('home'))
 	if action:
 		if action == 'confirmed':
 			action_text = message_strings.signup_account_confirmed
@@ -79,13 +84,9 @@ def login():
 		if usr:
 			if usr['password'] == base64.b64encode(request.form['password']):
 				session['username'] = usr['username']
-				redirect(url_for('home'))
-			else:
-				# login failed - bad credentials
-				return render_template('login.html', error_text=message_strings.login_failed)
-		else:
-			# login failed - username does not exist
-			return render_template('login.html', error=message_strings.login_failed)
+				return redirect(url_for('home'))
+		
+		return render_template('login.html', error_text=message_strings.login_failed)
 	else:
 		abort(405)
 
@@ -94,8 +95,8 @@ def login():
 @app.route("/signup/", methods=['GET', 'POST'])
 def signup():
 	err = request.args.get('error')
-	if 'user' in session:
-		redirect(url_for('home'))
+	if 'username' in session:
+		return redirect(url_for('home'))
 	if request.method == 'GET':
 		return render_template('signup.html', error=0)
 
@@ -124,10 +125,10 @@ def signup():
 							request.form['email'], confirm , 0)
 		if worked == -2:
 			print("username already in use!")
-			redirect(url_for('login', error="username"))
+			return redirect(url_for('login', error="username"))
 		if worked == -1:
 			print("email already in use!")
-			redirect(url_for('login', error="email"))
+			return redirect(url_for('login', error="email"))
 		if worked > 0:
 			print("saved successfully")
 			session['user'] = {
